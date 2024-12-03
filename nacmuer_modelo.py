@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 class NacimientoMuerteVentana(tk.Toplevel):
-    def __init__(self, parent):
-        super().__init__(parent)
+    def _init_(self, parent):
+        super()._init_(parent)
         self.title("Modelo de Nacimiento y Muerte")
         self.geometry("400x400")
 
@@ -46,7 +46,11 @@ class NacimientoMuerteVentana(tk.Toplevel):
                 return
 
             rho = lam / mu
-            p0 = 1 - rho  # P(0)
+
+            # Calcular la sumatoria de rho^i desde i = 0 hasta i = n
+            sumatoria = sum(rho**i for i in range(n + 1))
+            # Calcular P0 usando la fórmula correcta
+            p0 = 1 / sumatoria
             probabilidades = [p0]
 
             # Calcular todas las probabilidades P(n)
@@ -70,6 +74,7 @@ class NacimientoMuerteVentana(tk.Toplevel):
             resultados_texto = (
                 f"Resultados:\n"
                 f"Utilización del sistema (ρ): {rho:.4f}\n"
+                f"Probabilidad de que no haya unidades en el sistema (ρ0): {p0:.4f}\n"
                 f"Longitud promedio del sistema (L): {L:.4f}\n"
                 f"Longitud promedio de la cola (Lq): {Lq:.4f}\n"
                 f"Tiempo promedio en la cola (Wq): {Wq:.4f}\n"
@@ -85,6 +90,4 @@ class NacimientoMuerteVentana(tk.Toplevel):
             self.resultados.config(state="disabled")
 
         except ValueError:
-            messagebox.showerror("Error", "Por favor, ingresa valores numéricos válidos.")
-
-
+            messagebox.showerror("Error", "Por favor, ingresa valores numéricos válidos.")
