@@ -43,12 +43,8 @@ class MGKVentana(tk.Toplevel):
             
             rho = lam / (k * mu)  # Utilización del sistema
             
-            if rho >= 1:
-                messagebox.showerror("Error", "El sistema no es estable (ρ debe ser menor a 1).")
-                return
-            
             # Cálculo de la sumatoria para normalizar probabilidades
-            suma = sum((lam / mu) ** i / factorial(i) for i in range(k))
+            suma = sum((lam / mu) ** i / factorial(i) for i in range(k + 1))
             pk = ((lam / mu) ** k / factorial(k)) / (suma)
 
             # Cálculo de Pj para j = 0 hasta k
@@ -62,7 +58,8 @@ class MGKVentana(tk.Toplevel):
 
             # Mostrar resultados
             resultados_texto = "\n".join(probabilidades)
-            resultados_texto += f"\n\nNúmero promedio de clientes en el sistema (L): {L:.4f}\n"
+            resultados_texto += f"\n\nUtilización del servidor (ρ): {rho:.4f}\n"
+            resultados_texto += f"Número promedio de clientes en el sistema (L): {L:.4f}\n"
             resultados_texto += f"Probabilidad de que todas las líneas estén ocupadas (P_k): {pk:.4f}\n"
             
             self.resultados.config(state="normal")

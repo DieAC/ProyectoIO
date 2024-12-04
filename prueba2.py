@@ -1,32 +1,24 @@
-import cvxpy as cp
-import numpy as np
+from scipy.optimize import minimize
 
-# Parámetros del problema
-P = np.array([[1, 0], [0, 2]])  # Matriz cuadrática (definida positiva)
-q = np.array([3, 4])  # Coeficientes lineales
-r = 0  # Término constante
+def objetivo(vars):
+    x1, x2 = vars
+    return -(x1 + x2**4) 
 
-# Restricciones
-A = np.array([[1, 1]])  # Restricciones de igualdad
-b = np.array([5])       # Límite de igualdad
+def restriccion1(vars):
+    x1, x2 = vars
+    return 9 - (3 * x1 + 2 * x2**2)
 
-# Variables
-x = cp.Variable(2)
 
-# Definir función objetivo
-objective = cp.Minimize((1 / 2) * cp.quad_form(x, P) + q @ x + r)
+restricciones = [{'type': 'ineq', 'fun': restriccion1}]
+limites = [(0, None), (0, None)] 
 
-# Restricciones
-constraints = [A @ x == b, x >= 0]
 
-# Formulación del problema
-problem = cp.Problem(objective, constraints)
+punto_inicial = [0.1, 2.0]
 
-# Resolver el problema
-optimal_value = problem.solve()
+resultado = minimize(objetivo, punto_inicial, bounds=limites, constraints=restricciones, method='SLSQP')
 
-# Mostrar resultados
-print("Valor óptimo de Z:", optimal_value)
-print("Solución óptima (valores de x):")
-print(f"x1 = {x.value[0]}")
-print(f"x2 = {x.value[1]}")
+x1, x2 = resultado.x
+print("Solución óptima:")
+print(f"x1 = {x1:.4f}")
+print(f"x2 = {x2:.4f}")
+print(f"z = {-resultado.fun:.4f}") 

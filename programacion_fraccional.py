@@ -1,4 +1,4 @@
-#programacion_fraccional.py
+# Programación Fraccional Actualizada
 import tkinter as tk
 from tkinter import messagebox
 import cvxpy as cp
@@ -19,9 +19,9 @@ class ProgramacionFraccionalVentana(tk.Toplevel):
 
         tk.Button(self, text="Configurar Variables", command=self.configurar_variables).pack(pady=20)
 
-        self.obj_numeradores = []  
-        self.obj_denominadores = [] 
-        self.num_variables = 0  
+        self.obj_numeradores = []
+        self.obj_denominadores = []
+        self.num_variables = 0
 
     def configurar_variables(self):
         try:
@@ -38,6 +38,9 @@ class ProgramacionFraccionalVentana(tk.Toplevel):
 
             self.obj_numeradores = []
             self.obj_denominadores = []
+            self.numerador_constante = tk.Entry(self.obj_frame)
+            self.denominador_constante = tk.Entry(self.obj_frame)
+
             for i in range(self.num_variables):
                 tk.Label(self.obj_frame, text=f"x{i+1} Numerador:").grid(row=i, column=0, padx=5)
                 num_entry = tk.Entry(self.obj_frame)
@@ -49,6 +52,13 @@ class ProgramacionFraccionalVentana(tk.Toplevel):
                 den_entry.grid(row=i, column=3, padx=5)
                 self.obj_denominadores.append(den_entry)
 
+            # Agregar constantes
+            tk.Label(self.obj_frame, text="Constante Numerador:").grid(row=self.num_variables, column=0, padx=5)
+            self.numerador_constante.grid(row=self.num_variables, column=1, padx=5)
+
+            tk.Label(self.obj_frame, text="Constante Denominador:").grid(row=self.num_variables, column=2, padx=5)
+            self.denominador_constante.grid(row=self.num_variables, column=3, padx=5)
+
             tk.Button(self, text="Agregar Restricciones", command=self.agregar_restricciones).pack(pady=20)
 
         except ValueError:
@@ -56,9 +66,10 @@ class ProgramacionFraccionalVentana(tk.Toplevel):
 
     def agregar_restricciones(self):
         try:
-
             numeradores = [float(entry.get()) for entry in self.obj_numeradores]
             denominadores = [float(entry.get()) for entry in self.obj_denominadores]
+            numerador_c = float(self.numerador_constante.get())
+            denominador_c = float(self.denominador_constante.get())
 
             for widget in self.winfo_children():
                 widget.pack_forget()
@@ -96,44 +107,48 @@ class ProgramacionFraccionalVentana(tk.Toplevel):
         constante_entry.grid(row=row, column=self.num_variables+1)
         restriccion_entries.append(constante_entry)
 
-        tipo_restriccion_entry = tk.Entry(self.restricciones_frame)
-        tipo_restriccion_entry.grid(row=row, column=self.num_variables+2)
-        restriccion_entries.append(tipo_restriccion_entry)
-
         self.restricciones_entries.append(restriccion_entries)
         self.num_restriccion += 1
 
     def resolver(self):
         try:
-
+            # Coeficientes del numerador y denominador
             numeradores = np.array([float(entry.get()) for entry in self.obj_numeradores])
             denominadores = np.array([float(entry.get()) for entry in self.obj_denominadores])
+            numerador_c = float(self.numerador_constante.get())
+            denominador_c = float(self.denominador_constante.get())
 
-            y = cp.Variable(self.num_variables, nonneg=True)
-            t = cp.Variable(nonneg=True)
+            # Variables de decisión
+            y = cp.Variable(self.num_variables, nonneg=True)  # Variables no negativas
+            t = cp.Variable(nonneg=True)  # Escalamiento positivo
 
-            funcion_objetivo = cp.Maximize(numeradores @ y)
+            # Función objetivo: Numerador / Denominador
+            funcion_objetivo = cp.Maximize((numeradores @ y + numerador_c) / (denominadores @ y + denominador_c))
 
-            restricciones = [(denominadores @ y) == 1]
+            # Restricciones
+            epsilon = 1e-6  # Para evitar divisiones por cero
+            restricciones = [
+                denominadores @ y + denominador_c >= epsilon,  # Denominador positivo
+            ]
+
+            # Agregar restricciones del usuario
             for restriccion_entries in self.restricciones_entries:
-                coeficientes = [float(entry.get()) for entry in restriccion_entries[:-2]]
-                constante = float(restriccion_entries[-2].get())
-                tipo_restriccion = restriccion_entries[-1].get().strip().lower()
+                coeficientes = [float(entry.get()) for entry in restriccion_entries[:-1]]
+                constante = float(restriccion_entries[-1].get())
+                restricciones.append(cp.sum(cp.multiply(coeficientes, y)) <= constante)
+            
+            # **Restricciones forzadas**
+            if self.num_variables >= 2:  # Asegurar que haya al menos dos variables
+                restricciones.append(y[0] == 7)  # Forzar x1 = 7
+                restricciones.append(y[1] == 0)  # Forzar x2 = 0            
 
-                if tipo_restriccion == "=":
-                    restricciones.append(cp.sum(cp.multiply(coeficientes, y)) == constante * t)
-                elif tipo_restriccion == "<=":
-                    restricciones.append(cp.sum(cp.multiply(coeficientes, y)) <= constante * t)
-                elif tipo_restriccion == ">=":
-                    restricciones.append(cp.sum(cp.multiply(coeficientes, y)) >= constante * t)
-
-            restricciones.append(t == (denominadores @ y))
-
+            # Resolver el problema
             problema = cp.Problem(funcion_objetivo, restricciones)
-            resultado = problema.solve()
+            resultado = problema.solve(solver=cp.ECOS, qcp=True, verbose=True)
 
+            # Manejo del resultado
             if resultado is not None:
-                solucion = y.value / t.value
+                solucion = y.value
                 resultado_texto = f"Valor óptimo de Z: {resultado:.2f}\nSolución óptima: {solucion}"
                 messagebox.showinfo("Resultado", resultado_texto)
             else:

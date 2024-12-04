@@ -10,90 +10,57 @@ class ProgramacionNoConvexaVentana(tk.Toplevel):
         self.geometry("700x500")
 
         # Configuración inicial
-        tk.Label(self, text="Número de variables:").pack(pady=10)
-        self.num_variables_entry = tk.Entry(self)
-        self.num_variables_entry.pack(pady=5)
+        tk.Label(self, text="Ingrese la función objetivo ").pack(pady=10)
+        self.func_objetivo_entry = tk.Entry(self, width=50)
+        self.func_objetivo_entry.pack(pady=5)
 
-        tk.Button(self, text="Configurar Variables", command=self.configurar_variables).pack(pady=20)
+        tk.Label(self, text="Ingrese los límites inferiores y superiores ").pack(pady=10)
+        self.limites_entry = tk.Entry(self, width=20)
+        self.limites_entry.pack(pady=5)
 
-    def configurar_variables(self):
-        try:
-            self.num_variables = int(self.num_variables_entry.get())
-            if self.num_variables < 1:
-                raise ValueError("El número de variables debe ser mayor que cero.")
+        tk.Label(self, text="Ingrese el valor inicial o iteracion ").pack(pady=10)
+        self.valor_inicial_entry = tk.Entry(self, width=20)
+        self.valor_inicial_entry.pack(pady=5)
 
-            # Limpiar ventana
-            for widget in self.winfo_children():
-                widget.pack_forget()
-
-            # Configurar función objetivo
-            tk.Label(self, text="Ingrese la función objetivo (en términos de x0, x1, ...):").pack(pady=10)
-            self.func_objetivo_entry = tk.Entry(self, width=50)
-            self.func_objetivo_entry.pack(pady=5)
-
-            tk.Button(self, text="Agregar Restricciones", command=self.agregar_restricciones).pack(pady=20)
-
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
-
-    def agregar_restricciones(self):
-        try:
-            self.obj_funcion = self.func_objetivo_entry.get()
-            if not self.obj_funcion:
-                raise ValueError("Debe ingresar una función objetivo.")
-
-            for widget in self.winfo_children():
-                widget.pack_forget()
-
-            # Configurar restricciones
-            tk.Label(self, text="Ingrese las restricciones (en términos de x0, x1, ...):").pack(pady=10)
-            self.restricciones_frame = tk.Frame(self)
-            self.restricciones_frame.pack(pady=10)
-
-            self.restricciones_entries = []
-            self.agregar_fila_restriccion()
-
-            tk.Button(self, text="Agregar Otra Restricción", command=self.agregar_fila_restriccion).pack(pady=10)
-            tk.Button(self, text="Resolver", command=self.resolver).pack(pady=20)
-
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
-
-    def agregar_fila_restriccion(self):
-        row = len(self.restricciones_entries)
-        restriccion_entry = tk.Entry(self.restricciones_frame, width=50)
-        restriccion_entry.grid(row=row, column=0, padx=5, pady=5)
-        self.restricciones_entries.append(restriccion_entry)
+        tk.Button(self, text="Resolver", command=self.resolver).pack(pady=20)
 
     def resolver(self):
         try:
-            # Definir función objetivo
-            def funcion_objetivo(x):
-                return eval(self.obj_funcion)
+     
+            funcion_objetivo = self.func_objetivo_entry.get()
+            limites_texto = self.limites_entry.get()
+            valor_inicial_texto = self.valor_inicial_entry.get()
 
-            # Definir restricciones
-            restricciones = []
-            for restriccion_entry in self.restricciones_entries:
-                restriccion_texto = restriccion_entry.get()
-                if restriccion_texto:
-                    restricciones.append({
-                        'type': 'ineq',
-                        'fun': lambda x, expr=restriccion_texto: eval(expr)
-                    })
+            if not funcion_objetivo or not limites_texto or not valor_inicial_texto:
+                raise ValueError("Todos los campos deben estar llenos.")
 
-            # Valores iniciales
-            x0 = np.zeros(self.num_variables)
+            limites = list(map(float, limites_texto.split(',')))
+            if len(limites) != 2 or limites[0] >= limites[1]:
+                raise ValueError("Los límites deben ser dos valores separados por coma  y el primero debe ser menor que el segundo.")
 
-            # Resolver problema
-            resultado = minimize(funcion_objetivo, x0, constraints=restricciones)
+            valor_inicial = [float(valor_inicial_texto)]
+
+           
+            def funcion(x):
+                return eval(funcion_objetivo)
+
+            
+            resultado = minimize(funcion, valor_inicial, bounds=[(limites[0], limites[1])])
 
             if resultado.success:
-                solucion = resultado.x
+                solucion = resultado.x[0]
                 valor_objetivo = resultado.fun
-                messagebox.showinfo("Resultado", f"Valor óptimo: {valor_objetivo}\nSolución: {solucion}")
+                messagebox.showinfo("Resultado", f"Valor óptimo para x: {solucion}\nValor objetivo óptimo: {valor_objetivo}")
             else:
-                messagebox.showerror("Error", "No se encontró solución óptima.")
+                messagebox.showerror("Error", "No se encontró una solución óptima.")
 
         except Exception as e:
             messagebox.showerror("Error", f"Error al resolver el problema: {e}")
 
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.withdraw()  
+    ventana = ProgramacionNoConvexaVentana(root)
+    root.mainloop()

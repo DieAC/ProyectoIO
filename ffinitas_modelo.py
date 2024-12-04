@@ -11,35 +11,36 @@ class ModeloFuentesFinitas:
     
     def calcular_probabilidad_ocupacion(self):
         # Calcular la sumatoria en el denominador
-        denominador = sum([(factorial(self.k) / (factorial(i) * factorial(self.k - i))) * (self.lambda_ / self.mu) ** i for i in range(self.k + 1)])
+        denominador = sum([(factorial(self.k) / (factorial(self.k - i))) * (self.lambda_ / self.mu) ** i for i in range(self.k + 1)])
         
         # Calcular la probabilidad P_j para cada j
-        probabilidad = [((factorial(self.k) / (factorial(i) * factorial(self.k - i))) * (self.lambda_ / self.mu) ** i) / denominador for i in range(self.k + 1)]
+        probabilidad = [(((factorial(self.k) / (factorial(self.k - i))) * (self.lambda_ / self.mu) ** i) / denominador) for i in range(self.k + 1)]
         
         return probabilidad
     
     def calcular_longitud_promedio(self):
         # Calcular P_k (probabilidad de que todos los servidores estén ocupados)
-        probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[-1]
-        
+        probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[0]
+        Lq = self.calcular_longitud_promedio_cola()
         # Calcular longitud promedio
-        L = self.lambda_ / self.mu * (1 / (1 - probabilidad_ocupacion))
+        L = Lq + (1 - probabilidad_ocupacion)
         
         return L
 
     def calcular_longitud_promedio_cola(self):
         # Calcular la probabilidad de que todos los servidores estén ocupados P(k)
-        probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[-1]
+        probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[0]
         
         # Calcular longitud promedio de la cola (Lq)
-        Lq = ((self.lambda_ ** 2) * probabilidad_ocupacion + self.rho ** 2) / (2 * (1 - self.rho))
+        Lq = self.k - (((self.lambda_ + self.mu) / self.lambda_) * (1 - probabilidad_ocupacion))
         
         return Lq
 
     def calcular_tiempo_promedio_cola(self):
         Lq = self.calcular_longitud_promedio_cola()
+        L = self.calcular_longitud_promedio()
         # Calcular tiempo promedio de espera en la cola (Wq)
-        Wq = Lq / self.lambda_
+        Wq = Lq / ((self.k - L) * self.lambda_)
         return Wq
 
     def calcular_tiempo_promedio_sistema(self):
@@ -52,6 +53,11 @@ class ModeloFuentesFinitas:
         # Calcular P_k (probabilidad de que todos los servidores estén ocupados)
         probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[-1]
         return probabilidad_ocupacion
+    
+    def calcular_probabilidad_de_ocupacion_nula(self):
+        # Calcular P_0 (probabilidad de que todos los servidores estén desocupados)
+        probabilidad_desocupacion = self.calcular_probabilidad_ocupacion()[0]
+        return probabilidad_desocupacion
 
 class FuentesFinitasVentana(tk.Toplevel):
     def __init__(self, parent):
@@ -68,7 +74,7 @@ class FuentesFinitasVentana(tk.Toplevel):
         self.mu_entry = tk.Entry(self)
         self.mu_entry.pack(pady=5)
         
-        tk.Label(self, text="Número de servidores (k):").pack(pady=5)
+        tk.Label(self, text="Población finita (N):").pack(pady=5)
         self.k_entry = tk.Entry(self)
         self.k_entry.pack(pady=5)
         
@@ -112,6 +118,9 @@ class FuentesFinitasVentana(tk.Toplevel):
             # Calcular la probabilidad de ocupación total (P(k))
             probabilidad_ocupacion_total = modelo.calcular_probabilidad_de_ocupacion_total()
             
+            # Calcular la probabilidad de ocupación total (P(k))
+            probabilidad_ocupacion_nula = modelo.calcular_probabilidad_de_ocupacion_nula()
+
             # Mostrar resultados en el área de texto
             resultados_texto = "Probabilidades de ocupación P(0) a P(k):\n"
             for i, p in enumerate(probabilidades):
@@ -121,6 +130,7 @@ class FuentesFinitasVentana(tk.Toplevel):
             resultados_texto += f"Longitud promedio de la cola Lq: {longitud_promedio_cola:.4f}\n"
             resultados_texto += f"Tiempo promedio en la cola Wq: {tiempo_promedio_cola:.4f}\n"
             resultados_texto += f"Tiempo promedio en el sistema W: {tiempo_promedio_sistema:.4f}\n"
+            resultados_texto += f"Probabilidad de que todos los servidores estén desocupados P(0): {probabilidad_ocupacion_nula:.4f}\n"
             resultados_texto += f"Probabilidad de que todos los servidores estén ocupados P(k): {probabilidad_ocupacion_total:.4f}"
             
             self.resultados.config(state="normal")

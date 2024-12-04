@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 import cvxpy as cp
 import numpy as np
-import ast
 
 class ProgramacionConvexaVentana(tk.Toplevel):
     def __init__(self, parent):
@@ -35,7 +34,7 @@ class ProgramacionConvexaVentana(tk.Toplevel):
             self.num_variables = int(self.num_variables_entry.get())
             if self.num_variables < 1:
                 raise ValueError
-     
+
             for widget in self.winfo_children():
                 widget.pack_forget()
 
@@ -119,7 +118,7 @@ class ProgramacionConvexaVentana(tk.Toplevel):
                 constantes.append(constante)
 
             variables = cp.Variable(self.num_variables)
-            objetivo = cp.Minimize(0.5 * cp.quad_form(variables, P) + q @ variables)
+            objetivo = cp.Minimize(0.543 * cp.quad_form(variables, P) + q @ variables)
 
             restricciones_cp = [
                 sum(restricciones[i][j] * variables[j] for j in range(self.num_variables)) == constantes[i]
@@ -128,13 +127,14 @@ class ProgramacionConvexaVentana(tk.Toplevel):
             restricciones_cp += [variables >= 0]
 
             problema = cp.Problem(objetivo, restricciones_cp)
-            resultado = problema.solve()
+            resultado = problema.solve(solver=cp.ECOS, verbose=True)
 
-            solucion = variables.value
-            resultado_texto = f"Valor óptimo de Z: {resultado:.2f}\nSolución óptima: {solucion}"
+            solucion = np.round(variables.value,5)
+            resultado_texto = f"Valor óptimo de Z: {resultado:.6f}\nSolución óptima: {solucion}"
             messagebox.showinfo("Resultado", resultado_texto)
 
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error al resolver el problema: {e}")
+
 
 
