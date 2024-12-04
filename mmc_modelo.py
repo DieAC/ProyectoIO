@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 class MMCVentana(tk.Toplevel):
-    def _init_(self, parent):
-        super()._init_(parent)
+    def __init__(self, parent):
+        super().__init__(parent)
         self.title("Modelo M/M/c")
         self.geometry("400x800")
         

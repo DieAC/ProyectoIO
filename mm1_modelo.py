@@ -37,6 +37,7 @@ class MM1Ventana(tk.Toplevel):
                 return
             
             rho = lam / mu
+            p0 = 1 - rho
             lq = (rho ** 2) / (1 - rho)
             wq = lq / lam
             l = lam / (mu - lam)
@@ -45,9 +46,10 @@ class MM1Ventana(tk.Toplevel):
             resultados_texto = (
                 f"Resultados:\n"
                 f"Utilización del servidor (ρ): {rho:.4f}\n"
+                f"Probabilidad de que no haya unidades en el sistema (p0): {p0:.4f}\n"
                 f"Número promedio de clientes en la cola (Lq): {lq:.4f}\n"
-                f"Tiempo promedio en la cola (Wq): {wq:.4f}\n"
                 f"Número promedio de clientes en el sistema (L): {l:.4f}\n"
+                f"Tiempo promedio en la cola (Wq): {wq:.4f}\n"
                 f"Tiempo promedio en el sistema (W): {w:.4f}\n"
             )
             self.resultados.config(state="normal")
