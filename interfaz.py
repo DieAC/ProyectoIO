@@ -44,7 +44,6 @@ class Aplicacion(tk.Tk):
         self.geometry("800x600")
         self.configure(bg="#f4f4f4")
 
-        # Tema visual
         style = ttk.Style(self)
         style.theme_use("clam")
         style.configure("TButton", font=("Helvetica", 12), padding=10)
@@ -60,7 +59,6 @@ class Aplicacion(tk.Tk):
         main_frame = ttk.Frame(self, padding="20")
         main_frame.pack(fill="both", expand=True)
 
-        # Botones
         categorias = [
             ("Modelo de Programación de Proyectos", self.abrir_menu_programacion_proyectos),
             ("Sistemas de Inventario", self.abrir_menu_sistemas_inventario),
@@ -73,25 +71,20 @@ class Aplicacion(tk.Tk):
         for texto, comando in categorias:
             ttk.Button(main_frame, text=texto, command=comando).pack(pady=5, fill="x")
 
-        # Botón para salir
         ttk.Button(self, text="Salir", command=self.quit).pack(pady=10)
 
     def crear_menu_categoria(self, titulo, opciones):
         for widget in self.winfo_children():
             widget.destroy()
 
-        # Título
         tk.Label(self, text=titulo, font=("Helvetica", 16, "bold"), bg="#f4f4f4", fg="#333").pack(pady=20)
 
-        # Frame principal
         categoria_frame = ttk.Frame(self, padding="20")
         categoria_frame.pack(fill="both", expand=True)
 
-        # Botones de opciones
         for texto, comando in opciones:
             ttk.Button(categoria_frame, text=texto, command=comando).pack(pady=5, fill="x")
 
-        # Botón para regresar al menú principal
         ttk.Button(self, text="Volver al Menú Principal", command=self.crear_menu_principal).pack(pady=20)
 
     def abrir_menu_programacion_proyectos(self):
