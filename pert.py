@@ -9,11 +9,9 @@ def calcular_pert(actividades):
                    duracion_mas_probable=actividad['probable'],
                    duracion_pesimista=actividad['pesimista'])
     
-    # Calcular la duración 
     for u, v, data in G.edges(data=True):
         data['duracion_esperada'] = (data['duracion_optima'] + 4 * data['duracion_mas_probable'] + data['duracion_pesimista']) / 6
     
-    # Camino critico
     camino_critico = nx.dag_longest_path(G, weight='duracion_esperada')
     duracion_total = nx.dag_longest_path_length(G, weight='duracion_esperada')
     

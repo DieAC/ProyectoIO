@@ -10,28 +10,22 @@ class ModeloFuentesFinitas:
         self.rho = lambda_ / mu
     
     def calcular_probabilidad_ocupacion(self):
-        # Calcular la sumatoria en el denominador
         denominador = sum([(factorial(self.k) / (factorial(self.k - i))) * (self.lambda_ / self.mu) ** i for i in range(self.k + 1)])
         
-        # Calcular la probabilidad P_j para cada j
         probabilidad = [(((factorial(self.k) / (factorial(self.k - i))) * (self.lambda_ / self.mu) ** i) / denominador) for i in range(self.k + 1)]
         
         return probabilidad
     
     def calcular_longitud_promedio(self):
-        # Calcular P_k (probabilidad de que todos los servidores estén ocupados)
         probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[0]
         Lq = self.calcular_longitud_promedio_cola()
-        # Calcular longitud promedio
         L = Lq + (1 - probabilidad_ocupacion)
         
         return L
 
     def calcular_longitud_promedio_cola(self):
-        # Calcular la probabilidad de que todos los servidores estén ocupados P(k)
         probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[0]
         
-        # Calcular longitud promedio de la cola (Lq)
         Lq = self.k - (((self.lambda_ + self.mu) / self.lambda_) * (1 - probabilidad_ocupacion))
         
         return Lq
@@ -39,23 +33,19 @@ class ModeloFuentesFinitas:
     def calcular_tiempo_promedio_cola(self):
         Lq = self.calcular_longitud_promedio_cola()
         L = self.calcular_longitud_promedio()
-        # Calcular tiempo promedio de espera en la cola (Wq)
         Wq = Lq / ((self.k - L) * self.lambda_)
         return Wq
 
     def calcular_tiempo_promedio_sistema(self):
         Wq = self.calcular_tiempo_promedio_cola()
-        # Calcular tiempo promedio en el sistema (W)
         W = Wq + (1 / self.mu)
         return W
 
     def calcular_probabilidad_de_ocupacion_total(self):
-        # Calcular P_k (probabilidad de que todos los servidores estén ocupados)
         probabilidad_ocupacion = self.calcular_probabilidad_ocupacion()[-1]
         return probabilidad_ocupacion
     
     def calcular_probabilidad_de_ocupacion_nula(self):
-        # Calcular P_0 (probabilidad de que todos los servidores estén desocupados)
         probabilidad_desocupacion = self.calcular_probabilidad_ocupacion()[0]
         return probabilidad_desocupacion
 
@@ -65,7 +55,6 @@ class FuentesFinitasVentana(tk.Toplevel):
         self.title("Modelo Fuentes Finitas")
         self.geometry("400x500")
         
-        # Etiquetas y entradas
         tk.Label(self, text="Tasa de llegada (λ):").pack(pady=5)
         self.lambda_entry = tk.Entry(self)
         self.lambda_entry.pack(pady=5)
@@ -78,21 +67,18 @@ class FuentesFinitasVentana(tk.Toplevel):
         self.k_entry = tk.Entry(self)
         self.k_entry.pack(pady=5)
         
-        # Botón para calcular
         tk.Button(self, text="Calcular", command=self.calcular).pack(pady=20)
         
-        # Área de resultados
         self.resultados = tk.Text(self, height=15, width=50, state="disabled")
         self.resultados.pack(pady=10)
         
-        # Botón para cerrar
         tk.Button(self, text="Cerrar", command=self.destroy).pack(pady=10)
 
     def calcular(self):
         try:
-            lambda_ = float(self.lambda_entry.get())  # λ
-            mu = float(self.mu_entry.get())  # μ
-            k = int(self.k_entry.get())  # k (número de servidores)
+            lambda_ = float(self.lambda_entry.get()) 
+            mu = float(self.mu_entry.get()) 
+            k = int(self.k_entry.get())  
             
             if lambda_ <= 0 or mu <= 0 or k <= 0:
                 messagebox.showerror("Error", "Todos los valores deben ser positivos.")
@@ -100,28 +86,21 @@ class FuentesFinitasVentana(tk.Toplevel):
             
             modelo = ModeloFuentesFinitas(lambda_, mu, k)
             
-            # Calcular probabilidades P(0) a P(k)
             probabilidades = modelo.calcular_probabilidad_ocupacion()
             
-            # Calcular longitud promedio
             longitud_promedio = modelo.calcular_longitud_promedio()
             
-            # Calcular longitud promedio de la cola
             longitud_promedio_cola = modelo.calcular_longitud_promedio_cola()
             
-            # Calcular tiempo promedio en la cola
             tiempo_promedio_cola = modelo.calcular_tiempo_promedio_cola()
             
-            # Calcular tiempo promedio en el sistema
             tiempo_promedio_sistema = modelo.calcular_tiempo_promedio_sistema()
             
-            # Calcular la probabilidad de ocupación total (P(k))
             probabilidad_ocupacion_total = modelo.calcular_probabilidad_de_ocupacion_total()
             
-            # Calcular la probabilidad de ocupación total (P(k))
+
             probabilidad_ocupacion_nula = modelo.calcular_probabilidad_de_ocupacion_nula()
 
-            # Mostrar resultados en el área de texto
             resultados_texto = "Probabilidades de ocupación P(0) a P(k):\n"
             for i, p in enumerate(probabilidades):
                 resultados_texto += f"P({i}) = {p:.4f}\n"

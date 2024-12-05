@@ -41,6 +41,8 @@ class ProgramacionCuadraticaVentana(tk.Toplevel):
             
             self.obj_lineales = []
             self.obj_cuadraticos = []
+            self.obj_interaccion = []  # Campo adicional
+
             for i in range(self.num_variables):
                 tk.Label(self.obj_frame, text=f"x{i+1}:").grid(row=i, column=0, padx=5)
                 linear_entry = tk.Entry(self.obj_frame)
@@ -51,7 +53,13 @@ class ProgramacionCuadraticaVentana(tk.Toplevel):
                 quad_entry = tk.Entry(self.obj_frame)
                 quad_entry.grid(row=i, column=3, padx=5)
                 self.obj_cuadraticos.append(quad_entry)
-            
+
+            # Campo adicional de interacción x1.x2
+            tk.Label(self.obj_frame, text="x1.x2:").grid(row=self.num_variables, column=0, padx=5)
+            inter_entry = tk.Entry(self.obj_frame)
+            inter_entry.grid(row=self.num_variables, column=1, columnspan=3, padx=5)
+            self.obj_interaccion.append(inter_entry)
+
             tk.Button(self, text="Agregar Restricciones", command=self.agregar_restricciones).pack(pady=20)
         
         except ValueError:

@@ -9,7 +9,6 @@ class ProgramacionNoConvexaVentana(tk.Toplevel):
         self.title("Programación No Convexa")
         self.geometry("700x500")
 
-        # Configuración inicial
         tk.Label(self, text="Ingrese la función objetivo ").pack(pady=10)
         self.func_objetivo_entry = tk.Entry(self, width=50)
         self.func_objetivo_entry.pack(pady=5)

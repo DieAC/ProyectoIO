@@ -8,7 +8,6 @@ class MGKVentana(tk.Toplevel):
         self.title("Modelo M/G/K")
         self.geometry("400x500")
         
-        # Etiquetas y entradas
         tk.Label(self, text="Tasa de llegada (λ):").pack(pady=5)
         self.lambda_entry = tk.Entry(self)
         self.lambda_entry.pack(pady=5)
@@ -21,42 +20,35 @@ class MGKVentana(tk.Toplevel):
         self.k_entry = tk.Entry(self)
         self.k_entry.pack(pady=5)
         
-        # Botón para calcular
         tk.Button(self, text="Calcular", command=self.calcular).pack(pady=20)
         
-        # Área de resultados
         self.resultados = tk.Text(self, height=15, width=50, state="disabled")
         self.resultados.pack(pady=10)
         
-        # Botón para cerrar
         tk.Button(self, text="Cerrar", command=self.destroy).pack(pady=10)
 
     def calcular(self):
         try:
-            lam = float(self.lambda_entry.get())  # λ
-            mu = float(self.mu_entry.get())      # μ
-            k = int(self.k_entry.get())          # k (número de servidores)
+            lam = float(self.lambda_entry.get())  
+            mu = float(self.mu_entry.get())     
+            k = int(self.k_entry.get())          
             
             if lam <= 0 or mu <= 0 or k <= 0:
                 messagebox.showerror("Error", "Todos los valores deben ser positivos.")
                 return
             
-            rho = lam / (k * mu)  # Utilización del sistema
+            rho = lam / (k * mu) 
             
-            # Cálculo de la sumatoria para normalizar probabilidades
             suma = sum((lam / mu) ** i / factorial(i) for i in range(k + 1))
             pk = ((lam / mu) ** k / factorial(k)) / (suma)
 
-            # Cálculo de Pj para j = 0 hasta k
             probabilidades = []
             for j in range(k + 1):
                 pj = ((lam / mu) ** j / factorial(j)) / (suma)
                 probabilidades.append(f"P({j}) = {pj:.4f}")
 
-            # Número promedio de clientes en el sistema (L)
             L = (lam / mu) * (1 - pk)
 
-            # Mostrar resultados
             resultados_texto = "\n".join(probabilidades)
             resultados_texto += f"\n\nUtilización del servidor (ρ): {rho:.4f}\n"
             resultados_texto += f"Número promedio de clientes en el sistema (L): {L:.4f}\n"

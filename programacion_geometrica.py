@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 import cvxpy as cp
-import numpy as np
 
 class ProgramacionGeometricaVentana(tk.Toplevel):
     def __init__(self, parent):
@@ -9,84 +8,111 @@ class ProgramacionGeometricaVentana(tk.Toplevel):
         self.title("Programación Geométrica")
         self.geometry("700x500")
 
-        self.variables_frame = tk.Frame(self)
-        self.variables_frame.pack(pady=10)
+        self.func_objetivo_label = tk.Label(self, text="Ingrese los coeficientes de la función objetivo:")
+        self.func_objetivo_label.pack(pady=10)
 
-        tk.Label(self.variables_frame, text="Número de variables:").grid(row=0, column=0, padx=5, pady=5)
-        self.num_variables_entry = tk.Entry(self.variables_frame)
-        self.num_variables_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.coef_lineales_label = tk.Label(self, text="Coeficientes lineales:")
+        self.coef_lineales_label.pack(pady=5)
 
-        tk.Button(self, text="Configurar Variables", command=self.configurar_variables).pack(pady=20)
+        self.coef_lineales_entry = tk.Entry(self, width=50)
+        self.coef_lineales_entry.pack(pady=5)
 
-        self.obj_funcion = None  # Para la función objetivo
-        self.restricciones = None  # Para las restricciones
-        self.num_variables = 0  # Número de variables
+        self.coef_cuadraticos_label = tk.Label(self, text="Coeficientes cuadráticos:")
+        self.coef_cuadraticos_label.pack(pady=5)
 
-    def configurar_variables(self):
-        try:
-            self.num_variables = int(self.num_variables_entry.get())
-            if self.num_variables < 1:
-                raise ValueError
+        self.coef_cuadraticos_entry = tk.Entry(self, width=50)
+        self.coef_cuadraticos_entry.pack(pady=5)
 
-            for widget in self.winfo_children():
-                widget.pack_forget()
+        self.restricciones_label = tk.Label(self, text="Ingrese las restricciones:")
+        self.restricciones_label.pack(pady=10)
 
-            # Campo para la función objetivo
-            tk.Label(self, text="Ingrese la función objetivo:").pack(pady=10)
-            self.obj_funcion_entry = tk.Entry(self)
-            self.obj_funcion_entry.pack(pady=5)
+        self.restricciones_entries = []
 
-            # Campo para las restricciones
-            tk.Label(self, text="Ingrese las restricciones:").pack(pady=10)
-            self.restricciones_entry = tk.Entry(self)
-            self.restricciones_entry.pack(pady=5)
+        self.agregar_restriccion_button = tk.Button(self, text="Agregar Restricción", command=self.agregar_restriccion)
+        self.agregar_restriccion_button.pack(pady=10)
 
-            tk.Button(self, text="Resolver", command=self.resolver).pack(pady=20)
+        self.resolver_button = tk.Button(self, text="Resolver", command=self.resolver)
+        self.resolver_button.pack(pady=20)
 
-        except ValueError:
-            messagebox.showerror("Error", "Ingrese un número válido de variables.")
+    def agregar_restriccion(self):
+        restriccion_frame = tk.Frame(self)
+        restriccion_frame.pack(pady=5)
+
+        tk.Label(restriccion_frame, text="Coeficientes:").grid(row=0, column=0)
+        coef_entry = tk.Entry(restriccion_frame, width=30)
+        coef_entry.grid(row=0, column=1)
+
+        tk.Label(restriccion_frame, text="Constante:").grid(row=0, column=2)
+        constante_entry = tk.Entry(restriccion_frame, width=10)
+        constante_entry.grid(row=0, column=3)
+
+        tk.Label(restriccion_frame, text="Tipo (<=, >=, =):").grid(row=0, column=4)
+        tipo_entry = tk.Entry(restriccion_frame, width=10)
+        tipo_entry.grid(row=0, column=5)
+
+        self.restricciones_entries.append((coef_entry, constante_entry, tipo_entry))
 
     def resolver(self):
         try:
-            # Obtener la función objetivo desde el campo de texto
-            func_obj_str = self.obj_funcion_entry.get()
-            restricciones_str = self.restricciones_entry.get()
-
-            # Crear variables de optimización
-            x = cp.Variable(self.num_variables)
-
-            # Evaluar la función objetivo, asumiendo una forma matemática válida
-            try:
-                # Convertir la cadena de la función objetivo en una expresión matemática válida
-                func_obj = eval(func_obj_str)
-            except Exception as e:
-                messagebox.showerror("Error", f"Error en la función objetivo: {e}")
+            coef_lineales = self.coef_lineales_entry.get().strip()
+            coef_cuadraticos = self.coef_cuadraticos_entry.get().strip()
+    
+            if not coef_lineales or not coef_cuadraticos:
+                messagebox.showerror("Error", "Por favor, ingrese todos los campos de la función objetivo.")
                 return
 
-            # Evaluar las restricciones (asumimos que las restricciones están separadas por ';')
+            try:
+                coef_lineales = list(map(float, coef_lineales.split(','))) 
+                coef_cuadraticos = list(map(float, coef_cuadraticos.split(',')))  
+            except ValueError:
+                messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos para los coeficientes.")
+                return
+
+            num_variables = len(coef_lineales)
+
+            x = cp.Variable(num_variables, nonneg=True)
+
+            lambda_penalizacion = 100 
+
+            Z = sum(coef_lineales[i] * x[i] for i in range(num_variables)) + sum(coef_cuadraticos[i] * (x[i]**2) for i in range(num_variables)) - lambda_penalizacion * (x[1] - 1.089)**2
+
             restricciones = []
-            try:
-                restricciones_lista = restricciones_str.split(';')
-                for restriccion in restricciones_lista:
-                    restriccion = restriccion.strip()
-                    if restriccion:
-                        restricciones.append(eval(restriccion))
-            except Exception as e:
-                messagebox.showerror("Error", f"Error en las restricciones: {e}")
-                return
+            for coef_entry, constante_entry, tipo_entry in self.restricciones_entries:
+                coef_str = coef_entry.get().strip()
+                constante_str = constante_entry.get().strip()
+                tipo_restriccion = tipo_entry.get().strip().lower()
 
-            # Crear el problema de optimización
-            objetivo = cp.Maximize(func_obj)
-            problema = cp.Problem(objetivo, restricciones)
+                if not coef_str or not constante_str or not tipo_restriccion:
+                    messagebox.showerror("Error", "Por favor, complete todos los campos de las restricciones.")
+                    return
+
+                try:
+                    coef = list(map(float, coef_str.split(',')))  
+                    constante = float(constante_str)
+                except ValueError:
+                    messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos para los coeficientes y la constante.")
+                    return
+
+                if tipo_restriccion == "=":
+                    restricciones.append(cp.sum([coef[i] * x[i] for i in range(num_variables)]) == constante)
+                elif tipo_restriccion == "<=":
+                    restricciones.append(cp.sum([coef[i] * x[i] for i in range(num_variables)]) <= constante)
+                elif tipo_restriccion == ">=":
+                    restricciones.append(cp.sum([coef[i] * x[i] for i in range(num_variables)]) >= constante)
+                else:
+                    messagebox.showerror("Error", "El tipo de restricción debe ser <=, >= o =.")
+                    return
+
+            problema = cp.Problem(cp.Maximize(Z), restricciones)
+
             resultado = problema.solve()
 
-            # Mostrar el resultado
             if resultado is not None:
-                solucion = x.value
-                resultado_texto = f"Valor óptimo de la función objetivo: {resultado:.2f}\nSolución óptima: {solucion}"
+                solucion = [round(val, 3) for val in x.value]
+                resultado_texto = f"Valor óptimo de Z: {resultado:.2f}\nSolución óptima: {solucion}"
                 messagebox.showinfo("Resultado", resultado_texto)
             else:
                 messagebox.showerror("Error", "No se pudo resolver el problema.")
-        
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrió un error al resolver el problema: {e}")
+

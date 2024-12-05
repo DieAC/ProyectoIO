@@ -7,7 +7,6 @@ class MG1Ventana(tk.Toplevel):
         self.title("Modelo M/G/1")
         self.geometry("400x500")
         
-        # Etiquetas y entradas
         tk.Label(self, text="Ratio de llegadas (λ):").pack(pady=5)
         self.lambda_entry = tk.Entry(self)
         self.lambda_entry.pack(pady=5)
@@ -20,21 +19,18 @@ class MG1Ventana(tk.Toplevel):
         self.var_s_entry = tk.Entry(self)
         self.var_s_entry.pack(pady=5)
         
-        # Botón para calcular
         tk.Button(self, text="Calcular", command=self.calcular).pack(pady=20)
         
-        # Área de resultados
         self.resultados = tk.Text(self, height=15, width=50, state="disabled")
         self.resultados.pack(pady=10)
         
-        # Botón para cerrar
         tk.Button(self, text="Cerrar", command=self.destroy).pack(pady=10)
 
     def calcular(self):
         try:
-            lam = float(self.lambda_entry.get())  # Tasa de llegadas
-            mu = float(self.mu_entry.get())  # Tasa de servicio
-            var_s = float(self.var_s_entry.get())  # Varianza del tiempo de servicio
+            lam = float(self.lambda_entry.get()) 
+            mu = float(self.mu_entry.get()) 
+            var_s = float(self.var_s_entry.get())  
 
             if lam >= mu:
                 messagebox.showerror("Error", "λ debe ser menor que μ para que el sistema sea estable.")

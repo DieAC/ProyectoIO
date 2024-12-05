@@ -7,7 +7,6 @@ class MMCVentana(tk.Toplevel):
         self.title("Modelo M/M/c")
         self.geometry("400x800")
         
-        # Etiquetas y entradas
         tk.Label(self, text="Número de servidores (c):").pack(pady=5)
         self.servers_entry = tk.Entry(self)
         self.servers_entry.pack(pady=5)
@@ -20,21 +19,18 @@ class MMCVentana(tk.Toplevel):
         self.lambda_entry = tk.Entry(self)
         self.lambda_entry.pack(pady=5)
         
-        # Botón para calcular
         tk.Button(self, text="Calcular", command=self.calcular).pack(pady=20)
         
-        # Área de resultados
         self.resultados = tk.Text(self, height=10, width=50, state="disabled")
         self.resultados.pack(pady=30)
         
-        # Botón para cerrar
         tk.Button(self, text="Cerrar", command=self.destroy).pack(pady=10)
 
     def calcular(self):
         try:
-            c = int(self.servers_entry.get())  # Número de servidores
-            mu = float(self.mu_entry.get())    # Ratio de servicio
-            lam = float(self.lambda_entry.get())  # Ratio de llegadas
+            c = int(self.servers_entry.get()) 
+            mu = float(self.mu_entry.get())    
+            lam = float(self.lambda_entry.get())
             
             if lam >= mu * c:
                 messagebox.showerror("Error", "λ debe ser menor que μ * c para que el sistema sea estable.")

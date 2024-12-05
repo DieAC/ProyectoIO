@@ -3,12 +3,11 @@ import tkinter as tk
 from tkinter import messagebox
 
 class MM1Ventana(tk.Toplevel):
-    def __init__(self, parent):  # Aceptar 'parent' como argumento
-        super().__init__(parent)  # Pasar 'parent' al constructor de Toplevel
+    def __init__(self, parent): 
+        super().__init__(parent) 
         self.title("Modelo M/M/1")
         self.geometry("400x400")
         
-        # Etiquetas y entradas
         tk.Label(self, text="Ratio de servicios (μ):").pack(pady=5)
         self.mu_entry = tk.Entry(self)
         self.mu_entry.pack(pady=5)
@@ -17,14 +16,11 @@ class MM1Ventana(tk.Toplevel):
         self.lambda_entry = tk.Entry(self)
         self.lambda_entry.pack(pady=5)
         
-        # Botón para calcular
         tk.Button(self, text="Calcular", command=self.calcular).pack(pady=20)
         
-        # Área de resultados
         self.resultados = tk.Text(self, height=10, width=50, state="disabled")
         self.resultados.pack(pady=10)
         
-        # Botón para cerrar
         tk.Button(self, text="Cerrar", command=self.destroy).pack(pady=10)
 
     def calcular(self):

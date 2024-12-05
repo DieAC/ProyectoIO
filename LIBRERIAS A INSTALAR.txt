@@ -1,0 +1,48 @@
+
+# Instrucciones para instalar las librerías necesarias
+
+# Paso 1: Asegurarse de tener pip actualizado
+python -m pip install --upgrade pip
+
+# Paso 2: Instalar las librerías requeridas
+pip install cvxpy
+pip install numpy
+pip install matplotlib
+pip install networkx
+pip install scipy
+pip install graphviz
+pip install pydotplus
+pip install Pillow
+pip install tkinter
+pip install sympy
+pip install scs
+pip install osqp
+pip install scikit-learn
+
+# Nota:
+# Para algunas librerías como tkinter, puede ser necesario instalarla junto con el entorno de Python
+# en sistemas operativos específicos, ya que es un módulo estándar en Python. Si encuentras problemas,
+# consulta la documentación oficial de tu sistema operativo.
+
+# Paso 3: Instalar scikit-learn.tree (parte de scikit-learn)
+# La funcionalidad de sklearn.tree se incluye en scikit-learn, por lo que no requiere una instalación separada.
+
+# Paso 4: Verificar la instalación
+# Puedes ejecutar el siguiente script para asegurarte de que todas las librerías se instalaron correctamente.
+python -c "
+import cvxpy
+import numpy
+import matplotlib
+import networkx
+import scipy
+import graphviz
+import pydotplus
+import PIL
+import tkinter
+import sympy
+import scs
+import osqp
+import sklearn
+import math
+print('Todas las librerías se importaron correctamente')
+"
